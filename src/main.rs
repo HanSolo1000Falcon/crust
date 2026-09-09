@@ -1,8 +1,15 @@
 use clap::{Parser, Subcommand};
 
-use crate::build::{lexer::Lexer, parser::{Parser as CrustParser, Program}};
+use crate::{
+    build::{
+        lexer::Lexer,
+        parser::{Parser as CrustParser, Program},
+    },
+    exec::interpreter::Interpreter,
+};
 
 mod build;
+mod exec;
 
 #[derive(Debug, Parser)]
 struct Args {
@@ -19,6 +26,10 @@ enum Command {
         #[clap(short, long)]
         file: Option<String>,
     },
+    #[clap(about = "Executes a *.crust file")]
+    Exec { file: String, args: Vec<String> },
+    #[clap(about = "Displays the AST of a *.crust file")]
+    GetTree { file: String },
 }
 
 fn main() {
@@ -61,6 +72,29 @@ fn main() {
                     std::process::exit(1);
                 }
             }
+        }
+        Command::Exec { file, args } => {
+            let executable_content = std::fs::read(&file).unwrap_or_else(|_| {
+                eprintln!("Error: Could not read the file '{}'.", file);
+                std::process::exit(1);
+            });
+            let program = Program::from_bytes(&executable_content).unwrap_or_else(|_| {
+                eprintln!("Error: Could not parse the executable file '{}'.", file);
+                std::process::exit(1);
+            });
+            let mut interpreter = Interpreter::new(program);
+            interpreter.run(args);
+        }
+        Command::GetTree { file } => {
+            let content = std::fs::read(&file).unwrap_or_else(|_| {
+                eprintln!("error: Could not read the file '{}'.", file);
+                std::process::exit(1);
+            });
+            let program = Program::from_bytes(&content).unwrap_or_else(|_| {
+                eprintln!("error: Could not parse the executable file '{}'.", file);
+                std::process::exit(1);
+            });
+            println!("{:#?}", program.items);
         }
     }
 }

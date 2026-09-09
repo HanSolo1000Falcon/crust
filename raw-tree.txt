@@ -1,0 +1,652 @@
+[
+    Namespace(
+        Namespace {
+            name: "test",
+            items: [
+                Function(
+                    Function {
+                        name: "increment",
+                        private: false,
+                        parameters: [
+                            Parameter {
+                                name: "to_increment",
+                                mutable: true,
+                                reference: true,
+                            },
+                        ],
+                        body: [
+                            Assign {
+                                target: Name(
+                                    "to_increment",
+                                ),
+                                value: Binary {
+                                    left: Name(
+                                        "to_increment",
+                                    ),
+                                    operator: Add,
+                                    right: Integer(
+                                        1,
+                                    ),
+                                },
+                            },
+                        ],
+                    },
+                ),
+                Function(
+                    Function {
+                        name: "immut_increment",
+                        private: false,
+                        parameters: [
+                            Parameter {
+                                name: "to_increment",
+                                mutable: true,
+                                reference: false,
+                            },
+                        ],
+                        body: [
+                            Return(
+                                Some(
+                                    Binary {
+                                        left: Name(
+                                            "to_increment",
+                                        ),
+                                        operator: Add,
+                                        right: Integer(
+                                            1,
+                                        ),
+                                    },
+                                ),
+                            ),
+                        ],
+                    },
+                ),
+                Function(
+                    Function {
+                        name: "hello_world",
+                        private: false,
+                        parameters: [
+                            Parameter {
+                                name: "print",
+                                mutable: true,
+                                reference: false,
+                            },
+                        ],
+                        body: [
+                            Expr(
+                                Call {
+                                    callee: Access {
+                                        value: Name(
+                                            "std",
+                                        ),
+                                        operator: Namespace,
+                                        member: "println",
+                                    },
+                                    arguments: [
+                                        Name(
+                                            "print",
+                                        ),
+                                    ],
+                                },
+                            ),
+                        ],
+                    },
+                ),
+            ],
+        },
+    ),
+    Entry(
+        [
+            Let {
+                mutable: true,
+                name: "incrementable",
+                value: Integer(
+                    2,
+                ),
+            },
+            Expr(
+                Call {
+                    callee: Access {
+                        value: Name(
+                            "test",
+                        ),
+                        operator: Namespace,
+                        member: "increment",
+                    },
+                    arguments: [
+                        Name(
+                            "incrementable",
+                        ),
+                    ],
+                },
+            ),
+            Expr(
+                Call {
+                    callee: Access {
+                        value: Name(
+                            "std",
+                        ),
+                        operator: Namespace,
+                        member: "println",
+                    },
+                    arguments: [
+                        String(
+                            "current: {incrementable}",
+                        ),
+                    ],
+                },
+            ),
+            Assign {
+                target: Name(
+                    "incrementable",
+                ),
+                value: Call {
+                    callee: Access {
+                        value: Name(
+                            "test",
+                        ),
+                        operator: Namespace,
+                        member: "immut_increment",
+                    },
+                    arguments: [
+                        Name(
+                            "incrementable",
+                        ),
+                    ],
+                },
+            },
+            Expr(
+                Call {
+                    callee: Access {
+                        value: Name(
+                            "std",
+                        ),
+                        operator: Namespace,
+                        member: "println",
+                    },
+                    arguments: [
+                        String(
+                            "current: {incrementable}",
+                        ),
+                    ],
+                },
+            ),
+            Let {
+                mutable: true,
+                name: "c",
+                value: Char(
+                    'c',
+                ),
+            },
+            If {
+                condition: Binary {
+                    left: Call {
+                        callee: Access {
+                            value: Name(
+                                "std",
+                            ),
+                            operator: Namespace,
+                            member: "rand",
+                        },
+                        arguments: [
+                            Integer(
+                                0,
+                            ),
+                            Integer(
+                                1,
+                            ),
+                        ],
+                    },
+                    operator: Greater,
+                    right: Float(
+                        0.5,
+                    ),
+                },
+                body: [
+                    Expr(
+                        Call {
+                            callee: Access {
+                                value: Name(
+                                    "std",
+                                ),
+                                operator: Namespace,
+                                member: "println",
+                            },
+                            arguments: [
+                                String(
+                                    "it was more than 0.5",
+                                ),
+                            ],
+                        },
+                    ),
+                ],
+                else_body: Some(
+                    [
+                        Expr(
+                            Call {
+                                callee: Access {
+                                    value: Name(
+                                        "std",
+                                    ),
+                                    operator: Namespace,
+                                    member: "println",
+                                },
+                                arguments: [
+                                    String(
+                                        "it wasn't more than 0.5",
+                                    ),
+                                ],
+                            },
+                        ),
+                    ],
+                ),
+            },
+            If {
+                condition: Boolean(
+                    true,
+                ),
+                body: [
+                    Expr(
+                        Call {
+                            callee: Access {
+                                value: Name(
+                                    "std",
+                                ),
+                                operator: Namespace,
+                                member: "println",
+                            },
+                            arguments: [
+                                String(
+                                    "this is true",
+                                ),
+                            ],
+                        },
+                    ),
+                ],
+                else_body: Some(
+                    [
+                        If {
+                            condition: Boolean(
+                                false,
+                            ),
+                            body: [
+                                Expr(
+                                    Call {
+                                        callee: Access {
+                                            value: Name(
+                                                "std",
+                                            ),
+                                            operator: Namespace,
+                                            member: "println",
+                                        },
+                                        arguments: [
+                                            String(
+                                                "this is false",
+                                            ),
+                                        ],
+                                    },
+                                ),
+                            ],
+                            else_body: None,
+                        },
+                    ],
+                ),
+            },
+            Let {
+                mutable: false,
+                name: "addition_object",
+                value: Call {
+                    callee: Access {
+                        value: Name(
+                            "addition",
+                        ),
+                        operator: Namespace,
+                        member: "construct",
+                    },
+                    arguments: [
+                        Integer(
+                            1,
+                        ),
+                        Integer(
+                            2,
+                        ),
+                    ],
+                },
+            },
+            Expr(
+                Call {
+                    callee: Access {
+                        value: Name(
+                            "std",
+                        ),
+                        operator: Namespace,
+                        member: "println",
+                    },
+                    arguments: [
+                        String(
+                            "result: {addition_object:>compute()}",
+                        ),
+                    ],
+                },
+            ),
+            While {
+                condition: Binary {
+                    left: Name(
+                        "incrementable",
+                    ),
+                    operator: Less,
+                    right: Integer(
+                        100,
+                    ),
+                },
+                body: [
+                    Assign {
+                        target: Name(
+                            "incrementable",
+                        ),
+                        value: Binary {
+                            left: Name(
+                                "incrementable",
+                            ),
+                            operator: Add,
+                            right: Call {
+                                callee: Access {
+                                    value: Name(
+                                        "std",
+                                    ),
+                                    operator: Namespace,
+                                    member: "rand",
+                                },
+                                arguments: [
+                                    Integer(
+                                        0,
+                                    ),
+                                    Integer(
+                                        1,
+                                    ),
+                                ],
+                            },
+                        },
+                    },
+                    Expr(
+                        Call {
+                            callee: Access {
+                                value: Name(
+                                    "std",
+                                ),
+                                operator: Namespace,
+                                member: "println",
+                            },
+                            arguments: [
+                                String(
+                                    "{incrementable}",
+                                ),
+                            ],
+                        },
+                    ),
+                ],
+            },
+            Expr(
+                Call {
+                    callee: Access {
+                        value: String(
+                            "hello",
+                        ),
+                        operator: Member,
+                        member: "len",
+                    },
+                    arguments: [],
+                },
+            ),
+            Let {
+                mutable: true,
+                name: "arr",
+                value: Call {
+                    callee: Access {
+                        value: Name(
+                            "array",
+                        ),
+                        operator: Namespace,
+                        member: "construct",
+                    },
+                    arguments: [
+                        String(
+                            "a",
+                        ),
+                        String(
+                            "b",
+                        ),
+                    ],
+                },
+            },
+            Block(
+                [
+                    Let {
+                        mutable: true,
+                        name: "i",
+                        value: Integer(
+                            0,
+                        ),
+                    },
+                    While {
+                        condition: Binary {
+                            left: Name(
+                                "i",
+                            ),
+                            operator: Less,
+                            right: Call {
+                                callee: Access {
+                                    value: Name(
+                                        "arr",
+                                    ),
+                                    operator: Member,
+                                    member: "len",
+                                },
+                                arguments: [],
+                            },
+                        },
+                        body: [
+                            Expr(
+                                Call {
+                                    callee: Access {
+                                        value: Name(
+                                            "std",
+                                        ),
+                                        operator: Namespace,
+                                        member: "println",
+                                    },
+                                    arguments: [
+                                        String(
+                                            "{i}: {arr:>at(i)}",
+                                        ),
+                                    ],
+                                },
+                            ),
+                            Assign {
+                                target: Name(
+                                    "i",
+                                ),
+                                value: Binary {
+                                    left: Name(
+                                        "i",
+                                    ),
+                                    operator: Add,
+                                    right: Integer(
+                                        1,
+                                    ),
+                                },
+                            },
+                        ],
+                    },
+                ],
+            ),
+            Expr(
+                Call {
+                    callee: Name(
+                        "random",
+                    ),
+                    arguments: [
+                        Integer(
+                            0,
+                        ),
+                        Integer(
+                            10,
+                        ),
+                    ],
+                },
+            ),
+        ],
+    ),
+    Function(
+        Function {
+            name: "random",
+            private: false,
+            parameters: [
+                Parameter {
+                    name: "min",
+                    mutable: false,
+                    reference: false,
+                },
+                Parameter {
+                    name: "max",
+                    mutable: false,
+                    reference: false,
+                },
+            ],
+            body: [
+                Return(
+                    Some(
+                        Call {
+                            callee: Access {
+                                value: Name(
+                                    "std",
+                                ),
+                                operator: Namespace,
+                                member: "rand",
+                            },
+                            arguments: [
+                                Name(
+                                    "min",
+                                ),
+                                Name(
+                                    "max",
+                                ),
+                            ],
+                        },
+                    ),
+                ),
+            ],
+        },
+    ),
+    Object(
+        Object {
+            name: "addition",
+            fields: [
+                Field {
+                    name: "a",
+                    mutable: true,
+                    private: true,
+                },
+                Field {
+                    name: "b",
+                    mutable: true,
+                    private: true,
+                },
+            ],
+            constructor: Some(
+                Function {
+                    name: "constructor",
+                    private: false,
+                    parameters: [
+                        Parameter {
+                            name: "a",
+                            mutable: true,
+                            reference: false,
+                        },
+                        Parameter {
+                            name: "b",
+                            mutable: true,
+                            reference: false,
+                        },
+                    ],
+                    body: [
+                        Assign {
+                            target: Access {
+                                value: Name(
+                                    "this",
+                                ),
+                                operator: Member,
+                                member: "a",
+                            },
+                            value: Name(
+                                "a",
+                            ),
+                        },
+                        Assign {
+                            target: Access {
+                                value: Name(
+                                    "this",
+                                ),
+                                operator: Member,
+                                member: "b",
+                            },
+                            value: Name(
+                                "b",
+                            ),
+                        },
+                    ],
+                },
+            ),
+            methods: [
+                Function {
+                    name: "compute",
+                    private: false,
+                    parameters: [],
+                    body: [
+                        Return(
+                            Some(
+                                Call {
+                                    callee: Access {
+                                        value: Name(
+                                            "this",
+                                        ),
+                                        operator: Member,
+                                        member: "compute_private",
+                                    },
+                                    arguments: [],
+                                },
+                            ),
+                        ),
+                    ],
+                },
+                Function {
+                    name: "compute_private",
+                    private: true,
+                    parameters: [],
+                    body: [
+                        Return(
+                            Some(
+                                Binary {
+                                    left: Access {
+                                        value: Name(
+                                            "this",
+                                        ),
+                                        operator: Member,
+                                        member: "a",
+                                    },
+                                    operator: Add,
+                                    right: Access {
+                                        value: Name(
+                                            "this",
+                                        ),
+                                        operator: Member,
+                                        member: "b",
+                                    },
+                                },
+                            ),
+                        ),
+                    ],
+                },
+            ],
+        },
+    ),
+]

@@ -119,13 +119,6 @@ impl ByteWriter {
                 self.u8(4);
                 self.statements(statements);
             }
-            Item::Import(tokens) => {
-                self.u8(5);
-                self.u32(tokens.len());
-                for token in tokens {
-                    self.token(token);
-                }
-            }
         }
     }
 
@@ -460,14 +453,6 @@ impl<'a> ByteReader<'a> {
                 items: self.items()?,
             })),
             4 => Ok(Item::Entry(self.statements()?)),
-            5 => {
-                let count = self.u32()?;
-                let mut tokens = Vec::with_capacity(count);
-                for _ in 0..count {
-                    tokens.push(self.token()?);
-                }
-                Ok(Item::Import(tokens))
-            }
             tag => Err(format!("unknown item tag {tag}")),
         }
     }
@@ -682,7 +667,6 @@ pub enum Item {
     Object(Object),
     Namespace(Namespace),
     Entry(Vec<Stmt>),
-    Import(Vec<Token>),
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -854,7 +838,9 @@ impl Parser {
             Some(Type::Get(tokens)) => {
                 let tokens = tokens.clone();
                 self.advance();
-                Ok(Item::Import(tokens))
+                self.tokens.splice(self.position..self.position, tokens);
+                self.skip_eol();
+                self.parse_item()
             }
             Some(Type::Entry) => {
                 self.advance();

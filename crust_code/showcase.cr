@@ -1,6 +1,8 @@
 get ./component.cr
 
 entry {
+    std::println("{1.2} 13 \{}")
+
     mut incrementable = 2
     test::increment(incrementable)
     std::println("current: {incrementable}")
@@ -29,6 +31,8 @@ entry {
         std::println("{incrementable}")
     }
 
+    "hello":>len()
+
     mut arr = array::construct("a", "b")
     {
         mut i = 0
@@ -37,6 +41,12 @@ entry {
             i = i + 1
         }
     }
+
+    random(0, 10)
+}
+
+func random(min, max) {
+    ret std::rand(min, max)
 }
 
 object addition {
