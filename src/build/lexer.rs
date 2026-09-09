@@ -1,4 +1,9 @@
-use std::{io::{Error, ErrorKind}, iter::Peekable, path::Path, str::Chars};
+use std::{
+    io::{Error, ErrorKind},
+    iter::Peekable,
+    path::Path,
+    str::Chars,
+};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Type {
@@ -16,7 +21,6 @@ pub enum Type {
 
     If,
     Else,
-    Elif,
     While,
     Break,
     Continue,
@@ -24,6 +28,7 @@ pub enum Type {
     Object,
     Namespace,
     Entry,
+    Constructor,
 
     Identifier(String),
     Integer(i64),
@@ -91,11 +96,10 @@ impl<'a> Lexer<'a> {
                 if token.token_type == Type::EOF {
                     break;
                 }
-                println!("Got token of type: {:?} at line {}, column {} in file {}", token.token_type, token.line, token.column, token.file);
                 tokens.push(token);
             } else {
                 eprintln!(
-                    "Ran into an error when tokenizing {}:\n{}",
+                    "ran into an error when tokenizing {}:\n{}",
                     self.current_file,
                     result.err().unwrap().to_string()
                 );
@@ -338,7 +342,7 @@ impl<'a> Lexer<'a> {
                 return Err(Error::new(
                     ErrorKind::InvalidData,
                     format!(
-                        "Unexpected character: {} at {} {}:{}",
+                        "unexpected character: {} at {} {}:{}",
                         c, self.current_file, self.current_line, self.current_column
                     ),
                 ));
@@ -365,7 +369,7 @@ impl<'a> Lexer<'a> {
             return Err(Error::new(
                 ErrorKind::InvalidData,
                 format!(
-                    "Invalid character literal: '{}' at {} {}:{}",
+                    "invalid character literal: '{}' at {} {}:{}",
                     char_value, self.current_file, self.current_line, self.current_column
                 ),
             ));
@@ -427,7 +431,6 @@ impl<'a> Lexer<'a> {
             "private" => Type::Private,
             "if" => Type::If,
             "else" => Type::Else,
-            "elif" => Type::Elif,
             "while" => Type::While,
             "break" => Type::Break,
             "continue" => Type::Continue,
@@ -435,6 +438,7 @@ impl<'a> Lexer<'a> {
             "object" => Type::Object,
             "namespace" => Type::Namespace,
             "entry" => Type::Entry,
+            "constructor" => Type::Constructor,
             "true" => Type::Boolean(true),
             "false" => Type::Boolean(false),
             _ => Type::Identifier(word.clone()),
@@ -473,7 +477,7 @@ impl<'a> Lexer<'a> {
                 Error::new(
                     ErrorKind::InvalidData,
                     format!(
-                        "Invalid float literal: {} at {} {}:{}",
+                        "invalid float literal: {} at {} {}:{}",
                         number, self.current_file, self.current_line, self.current_column
                     ),
                 )
@@ -483,7 +487,7 @@ impl<'a> Lexer<'a> {
                 Error::new(
                     ErrorKind::InvalidData,
                     format!(
-                        "Invalid integer literal: {} at {} {}:{}",
+                        "invalid integer literal: {} at {} {}:{}",
                         number, self.current_file, self.current_line, self.current_column
                     ),
                 )
@@ -501,7 +505,7 @@ impl<'a> Lexer<'a> {
     fn tokenize_get(&mut self) -> Result<Token, Error> {
         self.skip_whitespace();
         let mut path = String::new();
-    
+
         while self.chars.peek() != Some(&'\n') && self.chars.peek().is_some() {
             path.push(self.chars.next().unwrap());
         }
@@ -517,7 +521,7 @@ impl<'a> Lexer<'a> {
             Error::new(
                 ErrorKind::NotFound,
                 format!(
-                    "File not found: {} at {} {}:{}",
+                    "file not found: {} at {} {}:{}",
                     path, self.current_file, self.current_line, self.current_column
                 ),
             )

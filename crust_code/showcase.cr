@@ -15,6 +15,12 @@ entry {
         std::println("it wasn't more than 0.5")
     }
 
+    if true {
+        std::println("this is true")
+    } else if false {
+        std::println("this is false")
+    }
+
     immut addition_object = addition::construct(1, 2)
     std::println("result: {addition_object:>compute()}")
 

@@ -1,6 +1,6 @@
 use clap::{Parser, Subcommand};
 
-use crate::build::lexer::Lexer;
+use crate::build::{lexer::Lexer, parser::{Parser as CrustParser, Program}};
 
 mod build;
 
@@ -55,7 +55,9 @@ fn main() {
                 }
 
                 if !found {
-                    eprintln!("Error: No 'main.cr' file found in the current directory or './src' directory.");
+                    eprintln!(
+                        "Error: No 'main.cr' file found in the current directory or './src' directory."
+                    );
                     std::process::exit(1);
                 }
             }
@@ -67,4 +69,19 @@ fn lex_and_parse_file(file_path: &str) {
     let content = std::fs::read_to_string(file_path).unwrap();
     let mut lexer = Lexer::new(&content, file_path);
     let tokens = lexer.tokenize();
+    let parser = CrustParser::new(tokens);
+    let stmt = match parser.parse() {
+        Ok(stmt) => stmt,
+        Err(e) => {
+            eprintln!("ran into an error when parsing:\n{}", e);
+            std::process::exit(1);
+        }
+    };
+    let executable_name = file_path
+        .split('/')
+        .last()
+        .unwrap_or("output.crust")
+        .replace(".cr", ".crust");
+    std::fs::write(&executable_name, stmt.to_bytes()).unwrap();
+    println!("Successfully built {} to {}", file_path, executable_name);
 }
