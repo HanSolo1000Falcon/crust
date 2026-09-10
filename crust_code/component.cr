@@ -11,3 +11,11 @@ namespace test {
         std::println(print)
     }
 }
+
+namespace outer {
+    namespace inner {
+        func hello() {
+            ret "nested namespace"
+        }
+    }
+}

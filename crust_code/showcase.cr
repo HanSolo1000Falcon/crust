@@ -1,48 +1,84 @@
 get ./component.cr
 
 entry {
-    std::println("{1.2} 13 \{}")
+    std::println("== crust showcase ==")
 
-    mut incrementable = 2
-    test::increment(incrementable)
-    std::println("current: {incrementable}")
-    incrementable = test::immut_increment(incrementable)
-    std::println("current: {incrementable}")
+    # literals, arithmetic, mixed numeric operations, and comparisons
+    immut integer = 7
+    immut decimal = 2.5
+    immut sum = integer + decimal
+    immut power = 2 ^ 3.0
+    immut comparison = sum > 9
+    immut absolute = std::abs(-3)
+    immut smaller = std::min(4, 9)
+    immut larger = std::max(4, 9)
+    std::println("numbers: {integer}, {decimal}, {sum}, {power}, {comparison}, abs={absolute}, min={smaller}, max={larger}")
 
-    mut c = 'c'
-
-    if std::rand(0, 1) > 0.5 {
-        std::println("it was more than 0.5")
+    # booleans, blocks, and if/else
+    if comparison && true {
+        std::println("branch: true")
     } else {
-        std::println("it wasn't more than 0.5")
+        std::println("branch: false")
     }
 
-    if true {
-        std::println("this is true")
-    } else if false {
-        std::println("this is false")
-    }
-
-    immut addition_object = addition::construct(1, 2)
-    std::println("result: {addition_object:>compute()}")
-
-    while incrementable < 100 {
-        incrementable = incrementable + std::rand(0, 1)
-        std::println("{incrementable}")
-    }
-
-    "hello":>len()
-
-    mut arr = array::construct("a", "b")
     {
-        mut i = 0
-        while i < arr:>len() { # no for loops because im lazy and everything can be done with while loops
-            std::println("{i}: {arr:>at(i)}")
-            i = i + 1
-        }
+        immut scoped = "inside a block"
+        std::println("scope: {scoped}")
     }
 
-    random(0, 10)
+    # while, continue, break, and mutation of an outer variable
+    mut counter = 0
+    while counter < 5 {
+        counter = counter + 1
+        if counter == 2 {
+            continue
+        }
+        if counter == 4 {
+            break
+        }
+        std::println("loop counter: {counter}")
+    }
+    std::println("loop finished at: {counter}")
+
+    # namespace functions, ordinary functions, and reference parameters
+    mut referenced = 10
+    test::increment(referenced)
+    immut incremented = test::immut_increment(referenced)
+    std::println("reference: {referenced}, returned: {incremented}")
+    test::hello_world("namespace call")
+    immut nested_message = outer::inner::hello()
+    std::println("nested: {nested_message}")
+
+    # objects, constructors, private fields, and private methods
+    immut computed = addition::construct(1, 2):>compute()
+    std::println("object result: {computed}")
+
+    immut record = record::construct("crust"):>read()
+    std::println("immutable field: {record}")
+
+    # arrays: construct, len, at, push, and rm
+    mut values = array::construct("a", "b")
+    values:>push("c")
+    values:>set(0, "updated")
+    immut before_remove = values:>len()
+    immut first = values:>at(0)
+    immut removed = values:>rm(1)
+    immut after_remove = values:>len()
+    std::println("array: first={first}, removed={removed}, lengths={before_remove}/{after_remove}")
+
+    # strings and character arrays
+    immut text = "Crust"
+    immut text_len = text:>len()
+    immut first_character = text:>at(0)
+    immut characters = text:>as_char_array()
+    immut character_count = characters:>len()
+    std::println("string: {text}, first={first_character}, length={text_len}, chars={characters}, char_count={character_count}")
+
+    # environment arguments and a numeric standard-library call
+    immut arguments = env::args()
+    immut has_arguments = env::has_args()
+    immut random_value = random(0, 10)
+    std::println("args: {arguments}, has_args={has_arguments}, random: {random_value}")
 }
 
 func random(min, max) {
@@ -64,5 +100,17 @@ object addition {
 
     func:private compute_private() {
         ret this:>a + this:>b
+    }
+}
+
+object record {
+    :private value
+
+    constructor(immut value) {
+        this:>value = value
+    }
+
+    func read() {
+        ret this:>value
     }
 }

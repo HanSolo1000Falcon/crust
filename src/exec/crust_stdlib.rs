@@ -1,4 +1,6 @@
-use std::io::{Error, ErrorKind::InvalidData};
+use std::io::{self, Error, ErrorKind::InvalidData};
+
+use rand::random_range;
 
 use crate::exec::interpreter::{Env, Value};
 
@@ -6,6 +8,9 @@ pub fn eval_std_call(function_name: String, args: Vec<Value>, env: &Env) -> Resu
     match function_name.as_str() {
         "println" => std_println(args, env),
         "print" => std_print(args, env),
+        "getln" => std_getln(args),
+        "rand" => std_rand(args),
+        "read_from_file" => std_read_from_file(args),
         _ => Err(Error::new(
             InvalidData,
             format!("the function '{function_name}' is not a part of the std lib"),
@@ -55,6 +60,64 @@ fn std_print(args: Vec<Value>, env: &Env) -> Result<Value, Error> {
     }
 }
 
+fn std_getln(args: Vec<Value>) -> Result<Value, Error> {
+    let args_len = args.len();
+    if args_len != 0 {
+        return Err(Error::new(
+            InvalidData,
+            format!("expected 0 arguments on std::getln() but got {args_len}"),
+        ));
+    }
+
+    let mut input = String::new();
+    io::stdin().read_line(&mut input).unwrap();
+    Ok(Value::String(input))
+}
+
+fn std_rand(args: Vec<Value>) -> Result<Value, Error> {
+    let args_len = args.len();
+    if args_len != 2 {
+        return Err(Error::new(
+            InvalidData,
+            format!("expected 2 arguments on std::rand() but got {args_len}"),
+        ));
+    }
+
+    let bounds: Result<Vec<f64>, Error> = args
+        .into_iter()
+        .enumerate()
+        .map(|(index, value)| match value {
+            Value::Int(value) => Ok(value as f64),
+            Value::Float(value) => Ok(value),
+            _ => Err(Error::new(
+                InvalidData,
+                format!("std::rand() argument {} must be a number", index + 1),
+            )),
+        })
+        .collect();
+    let bounds = bounds?;
+
+    let min = bounds[0];
+    let max = bounds[1];
+
+    Ok(Value::Float(random_range(min..max)))
+}
+
+fn std_read_from_file(args: Vec<Value>) -> Result<Value, Error> {
+    let args_len = args.len();
+    if args_len != 1 {
+        return Err(Error::new(
+            InvalidData,
+            format!("expected 1 arguments on std::read_from_file() but got {args_len}"),
+        ));
+    }
+
+    match args[0].clone() {
+        Value::String(file_path) => Ok(Value::String(std::fs::read_to_string(file_path)?.to_string())),
+        _ => Err(Error::new(InvalidData, "std::read_from_file() expects a string as it's only argument")),
+    }
+}
+
 fn format_string(input: &str, env: &Env) -> Result<String, Error> {
     let mut output = String::with_capacity(input.len());
     let mut characters = input.chars().peekable();
@@ -87,10 +150,13 @@ fn format_string(input: &str, env: &Env) -> Result<String, Error> {
                     return Err(Error::new(InvalidData, "empty format placeholder"));
                 }
 
-                let value = env.get(&name).map(|(value, _)| value).ok_or_else(|| {
-                    Error::new(InvalidData, format!("unknown format variable '{name}'"))
-                })?;
-                output.push_str(&value_to_string(value));
+                let value = env
+                    .get(&name)
+                    .map(|(value, _)| value.borrow())
+                    .ok_or_else(|| {
+                        Error::new(InvalidData, format!("unknown format variable '{name}'"))
+                    })?;
+                output.push_str(&value_to_string(&value));
             }
             '}' => output.push('}'),
             _ => output.push(character),
@@ -117,6 +183,8 @@ fn value_to_string(value: &Value) -> String {
         ),
         Value::Callee(function, _, _) => format!("<callee {function}>"),
         Value::Name(name) => name.clone(),
+        Value::Object { name, .. } => format!("<object {name}>"),
+        Value::Reference(value) => value_to_string(&value.borrow()),
         Value::None => "none".to_string(),
     }
 }
